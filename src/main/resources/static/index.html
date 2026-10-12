@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>契約照会</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main>
+    <h1>契約照会</h1>
+    <div class="search">
+      <label for="policyNumber">契約番号</label>
+      <input id="policyNumber" type="text" maxlength="8" placeholder="例: P0000001" autocomplete="off">
+      <button id="searchButton" type="button">照会</button>
+    </div>
+
+    <div id="warning" class="warning" role="alert" hidden>
+      契約満期が30日以内です。更新のご案内をご確認ください。
+    </div>
+    <div id="error" class="error" role="alert" hidden></div>
+
+    <dl id="result" hidden>
+      <dt>契約番号</dt><dd id="resPolicyNumber"></dd>
+      <dt>契約者名</dt><dd id="resHolderName"></dd>
+      <dt>満期日</dt><dd id="resExpiryDate"></dd>
+    </dl>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>
