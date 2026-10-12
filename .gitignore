@@ -1,0 +1,15 @@
+target/
+*.log
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# Secrets / local config
+.env
+*.env
+application-local.properties
