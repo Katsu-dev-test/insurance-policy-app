@@ -97,6 +97,8 @@ curl "http://127.0.0.1:8080/api/policies?holderName=山田&status=ACTIVE"
 
 これ以外は `false` です(`ACTIVE` 以外のステータス、更新済み、満期日を過ぎた契約)。
 
+補足:
+
 - 基準日は Asia/Tokyo の暦日。
 - 30 日の閾値は `PolicyService.EXPIRY_WARNING_DAYS` で定義しています(固定値)。
 
