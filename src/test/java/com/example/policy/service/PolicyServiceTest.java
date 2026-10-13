@@ -16,6 +16,8 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 class PolicyServiceTest {
 
@@ -89,10 +91,17 @@ class PolicyServiceTest {
         assertFalse(s.isExpiringSoon(new Policy("P0000009", "テスト 太郎", LocalDate.of(2026, 11, 12), PolicyStatus.ACTIVE)));
     }
 
+    @ParameterizedTest
+    @EnumSource(value = PolicyStatus.class, names = "ACTIVE", mode = EnumSource.Mode.EXCLUDE)
+    void ACTIVE以外の契約は満期日が近くても警告対象外(PolicyStatus status) {
+        Policy policy = new Policy("P0000004", "山田 太郎", TODAY.plusDays(5), status);
+        assertFalse(service.isExpiringSoon(policy));
+    }
+
     @Test
-    void 解約済み契約でも満期日が近ければ警告対象() {
-        Policy canceled = new Policy("P0000004", "山田 太郎", TODAY.plusDays(5), PolicyStatus.CANCELED);
-        assertTrue(service.isExpiringSoon(canceled));
+    void ACTIVEの契約は満期日が近ければ警告対象() {
+        Policy active = new Policy("P0000001", "山田 太郎", TODAY.plusDays(5), PolicyStatus.ACTIVE);
+        assertTrue(service.isExpiringSoon(active));
     }
 
     @Test
