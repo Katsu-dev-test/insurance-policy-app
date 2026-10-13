@@ -23,7 +23,7 @@ class PolicyControllerUnitTest {
 
     @Test
     void 契約の内容をレスポンスに詰め替える() {
-        Policy policy = new Policy("P0000001", "山田 太郎", EXPIRY, PolicyStatus.ACTIVE);
+        Policy policy = new Policy("P0000001", "山田 太郎", EXPIRY, PolicyStatus.ACTIVE, false);
         when(policyService.getPolicy("P0000001")).thenReturn(policy);
         when(policyService.isExpiringSoon(policy)).thenReturn(true);
 
@@ -38,7 +38,7 @@ class PolicyControllerUnitTest {
 
     @Test
     void 満期予告対象外ならフラグはfalse() {
-        Policy policy = new Policy("P0000003", "鈴木 一郎", EXPIRY, PolicyStatus.ACTIVE);
+        Policy policy = new Policy("P0000003", "鈴木 一郎", EXPIRY, PolicyStatus.ACTIVE, false);
         when(policyService.getPolicy("P0000003")).thenReturn(policy);
         when(policyService.isExpiringSoon(policy)).thenReturn(false);
 
