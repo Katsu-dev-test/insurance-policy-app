@@ -7,11 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.example.policy.domain.Policy;
 import com.example.policy.domain.PolicyNotFoundException;
+import com.example.policy.domain.PolicyStatus;
 import com.example.policy.repository.PolicyRepository;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
@@ -22,15 +24,26 @@ class PolicyServiceTest {
 
     private final Clock clock = Clock.fixed(TODAY.atStartOfDay(TOKYO).toInstant(), TOKYO);
 
-    private final PolicyRepository repository = policyNumber ->
-            "P0000001".equals(policyNumber)
-                    ? Optional.of(new Policy("P0000001", "山田 太郎", TODAY.plusDays(10)))
+    private final PolicyRepository repository = new PolicyRepository() {
+        @Override
+        public Optional<Policy> findByPolicyNumber(String policyNumber) {
+            return "P0000001".equals(policyNumber)
+                    ? Optional.of(new Policy("P0000001", "山田 太郎", TODAY.plusDays(10), PolicyStatus.ACTIVE))
                     : Optional.empty();
+        }
+
+        @Override
+        public List<Policy> search(String holderNameContains, PolicyStatus status) {
+            return List.of(
+                    new Policy("P0000001", "山田 太郎", TODAY.plusDays(10), PolicyStatus.ACTIVE),
+                    new Policy("P0000004", "山田 太郎", TODAY.minusDays(60), PolicyStatus.CANCELED));
+        }
+    };
 
     private final PolicyService service = new PolicyService(repository, clock);
 
     private Policy policyExpiringIn(long days) {
-        return new Policy("P0000009", "テスト 太郎", TODAY.plusDays(days));
+        return new Policy("P0000009", "テスト 太郎", TODAY.plusDays(days), PolicyStatus.ACTIVE);
     }
 
     @Test
@@ -70,11 +83,27 @@ class PolicyServiceTest {
 
     @Test
     void 基準日は東京時間の暦日で判定する() {
-        // UTC では 2026-10-11 15:00 だが、東京では 2026-10-12 00:00 になる
         Clock utcLateEvening = Clock.fixed(Instant.parse("2026-10-11T15:00:00Z"), TOKYO);
         PolicyService s = new PolicyService(repository, utcLateEvening);
-        // 東京基準で今日が 10/12 なので、11/11 はちょうど 30 日後
-        assertTrue(s.isExpiringSoon(new Policy("P0000009", "テスト 太郎", LocalDate.of(2026, 11, 11))));
-        assertFalse(s.isExpiringSoon(new Policy("P0000009", "テスト 太郎", LocalDate.of(2026, 11, 12))));
+        assertTrue(s.isExpiringSoon(new Policy("P0000009", "テスト 太郎", LocalDate.of(2026, 11, 11), PolicyStatus.ACTIVE)));
+        assertFalse(s.isExpiringSoon(new Policy("P0000009", "テスト 太郎", LocalDate.of(2026, 11, 12), PolicyStatus.ACTIVE)));
+    }
+
+    @Test
+    void 解約済み契約でも満期日が近ければ警告対象() {
+        Policy canceled = new Policy("P0000004", "山田 太郎", TODAY.plusDays(5), PolicyStatus.CANCELED);
+        assertTrue(service.isExpiringSoon(canceled));
+    }
+
+    @Test
+    void searchがリポジトリの結果を返す() {
+        List<Policy> result = service.search("山田", null);
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void searchの契約者名が空白のみなら全件対象になる() {
+        List<Policy> result = service.search("  ", null);
+        assertEquals(2, result.size());
     }
 }

@@ -9,14 +9,11 @@ import static org.mockito.Mockito.when;
 
 import com.example.policy.domain.Policy;
 import com.example.policy.domain.PolicyNotFoundException;
+import com.example.policy.domain.PolicyStatus;
 import com.example.policy.service.PolicyService;
 import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 
-/**
- * Spring を起動せず、PolicyService をモックしてコントローラ単体の変換処理を検証する。
- * 入力形式の検証(@Pattern)は Spring の機能のため PolicyControllerTest で確認する。
- */
 class PolicyControllerUnitTest {
 
     private static final LocalDate EXPIRY = LocalDate.of(2026, 10, 22);
@@ -26,7 +23,7 @@ class PolicyControllerUnitTest {
 
     @Test
     void 契約の内容をレスポンスに詰め替える() {
-        Policy policy = new Policy("P0000001", "山田 太郎", EXPIRY);
+        Policy policy = new Policy("P0000001", "山田 太郎", EXPIRY, PolicyStatus.ACTIVE);
         when(policyService.getPolicy("P0000001")).thenReturn(policy);
         when(policyService.isExpiringSoon(policy)).thenReturn(true);
 
@@ -36,11 +33,12 @@ class PolicyControllerUnitTest {
         assertEquals("山田 太郎", response.policyHolderName());
         assertEquals(EXPIRY, response.expiryDate());
         assertTrue(response.expiringSoon());
+        assertEquals(PolicyStatus.ACTIVE, response.status());
     }
 
     @Test
     void 満期予告対象外ならフラグはfalse() {
-        Policy policy = new Policy("P0000003", "鈴木 一郎", EXPIRY);
+        Policy policy = new Policy("P0000003", "鈴木 一郎", EXPIRY, PolicyStatus.ACTIVE);
         when(policyService.getPolicy("P0000003")).thenReturn(policy);
         when(policyService.isExpiringSoon(policy)).thenReturn(false);
 

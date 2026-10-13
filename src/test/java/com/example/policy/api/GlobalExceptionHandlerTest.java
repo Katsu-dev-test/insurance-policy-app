@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import com.example.policy.domain.PolicyNotFoundException;
+import com.example.policy.domain.PolicyStatus;
 import jakarta.validation.ConstraintViolationException;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
@@ -44,5 +45,20 @@ class GlobalExceptionHandlerTest {
                 new ConstraintViolationException("getPolicy.policyNumber: must match pattern", Set.of()));
 
         assertFalse(problem.getDetail().contains("pattern"));
+    }
+
+    @Test
+    void 不正なステータス値は400と汎用メッセージを返す() {
+        ProblemDetail problem = handler.handleInvalidStatus(new InvalidStatusException("UNKNOWN"));
+
+        assertEquals(HttpStatus.BAD_REQUEST.value(), problem.getStatus());
+        assertEquals("Invalid request", problem.getDetail());
+    }
+
+    @Test
+    void 不正なステータスの応答に指定した値を含めない() {
+        ProblemDetail problem = handler.handleInvalidStatus(new InvalidStatusException("UNKNOWN"));
+
+        assertFalse(problem.getDetail().contains("UNKNOWN"));
     }
 }
