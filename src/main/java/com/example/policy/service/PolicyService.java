@@ -39,10 +39,13 @@ public class PolicyService {
     }
 
     /**
-     * 満期日が本日から 0〜30 日後(両端含む)なら true。満期日を過ぎた契約は対象外。
-     * ステータスは考慮しない(解約済みでも満期日が近ければ true になる)。
+     * ACTIVE の契約で、満期日が本日から 0〜30 日後(両端含む)なら true。
+     * 満期日を過ぎた契約、および CANCELED / LAPSED / EXPIRED の契約は対象外。
      */
     public boolean isExpiringSoon(Policy policy) {
+        if (policy.status() != PolicyStatus.ACTIVE) {
+            return false;
+        }
         long days = ChronoUnit.DAYS.between(LocalDate.now(clock), policy.expiryDate());
         return days >= 0 && days <= EXPIRY_WARNING_DAYS;
     }
