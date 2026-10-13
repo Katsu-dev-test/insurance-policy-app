@@ -29,4 +29,10 @@ public class GlobalExceptionHandler {
         log.info("Invalid policy number format");
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Invalid request");
     }
+
+    @ExceptionHandler(InvalidStatusException.class)
+    public ProblemDetail handleInvalidStatus(InvalidStatusException e) {
+        log.info("Invalid status value");
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Invalid request");
+    }
 }
