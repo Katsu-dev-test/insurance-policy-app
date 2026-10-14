@@ -42,7 +42,7 @@ class InMemoryPolicyRepositoryTest {
 
     @Test
     void 条件なしで全件を返す() {
-        assertEquals(8, repository.search(null, null).size());
+        assertEquals(9, repository.search(null, null).size());
     }
 
     @Test

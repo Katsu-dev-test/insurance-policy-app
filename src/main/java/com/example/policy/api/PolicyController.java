@@ -55,7 +55,8 @@ public class PolicyController {
                 policy.policyHolderName(),
                 policy.expiryDate(),
                 policyService.isExpiringSoon(policy),
-                policy.status());
+                policy.status(),
+                policy.renewed());
     }
 
     /**

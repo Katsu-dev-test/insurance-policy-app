@@ -76,6 +76,33 @@ class PolicyControllerTest {
     }
 
     @Test
+    void 更新済みの契約は満期が近くても警告フラグがfalseでrenewedがtrue() throws Exception {
+        mockMvc.perform(get("/api/policies/P0000009"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.expiryDate").value("2026-10-27"))
+                .andExpect(jsonPath("$.status").value("ACTIVE"))
+                .andExpect(jsonPath("$.renewed").value(true))
+                .andExpect(jsonPath("$.expiringSoon").value(false));
+    }
+
+    @Test
+    void 未更新の契約はrenewedがfalse() throws Exception {
+        mockMvc.perform(get("/api/policies/P0000001"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.renewed").value(false));
+    }
+
+    @Test
+    void 検索結果にrenewedが含まれる() throws Exception {
+        mockMvc.perform(get("/api/policies").param("holderName", "高橋"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].policyNumber").value("P0000009"))
+                .andExpect(jsonPath("$[0].renewed").value(true))
+                .andExpect(jsonPath("$[0].expiringSoon").value(false));
+    }
+
+    @Test
     void 存在しない契約番号は404を返す() throws Exception {
         mockMvc.perform(get("/api/policies/P9999999"))
                 .andExpect(status().isNotFound())
@@ -102,7 +129,7 @@ class PolicyControllerTest {
     void 条件未指定で全件を返す() throws Exception {
         mockMvc.perform(get("/api/policies"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(8));
+                .andExpect(jsonPath("$.length()").value(9));
     }
 
     @Test
@@ -162,7 +189,7 @@ class PolicyControllerTest {
     void statusは大文字小文字を区別しない() throws Exception {
         mockMvc.perform(get("/api/policies").param("status", "active"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(5));
+                .andExpect(jsonPath("$.length()").value(6));
     }
 
     @Test
@@ -178,7 +205,7 @@ class PolicyControllerTest {
         mockMvc.perform(get("/api/policies"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].policyNumber").value("P0000001"))
-                .andExpect(jsonPath("$[7].policyNumber").value("P0000008"));
+                .andExpect(jsonPath("$[8].policyNumber").value("P0000009"));
     }
 
     @Test
