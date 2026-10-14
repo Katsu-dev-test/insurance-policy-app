@@ -215,4 +215,50 @@ class PolicyControllerTest {
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].policyNumber").value("P0000008"));
     }
+
+    @Test
+    void statusが空白のみの場合は未指定として全件を返す() throws Exception {
+        mockMvc.perform(get("/api/policies").param("status", "   "))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(9));
+    }
+
+    @Test
+    void statusが空文字の場合は未指定として全件を返す() throws Exception {
+        mockMvc.perform(get("/api/policies").param("status", ""))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(9));
+    }
+
+    @Test
+    void holderNameが空白のみの場合は未指定として全件を返す() throws Exception {
+        mockMvc.perform(get("/api/policies").param("holderName", "   "))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(9));
+    }
+
+    @Test
+    void 両方とも空白のみの場合は全件を返す() throws Exception {
+        mockMvc.perform(get("/api/policies")
+                        .param("holderName", " ")
+                        .param("status", " "))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(9));
+    }
+
+    @Test
+    void statusの前後の空白は除去して絞り込む() throws Exception {
+        mockMvc.perform(get("/api/policies").param("status", " canceled "))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].policyNumber").value("P0000004"));
+    }
+
+    @Test
+    void holderNameの前後の空白は除去して絞り込む() throws Exception {
+        mockMvc.perform(get("/api/policies").param("holderName", "  smith  "))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].policyNumber").value("P0000008"));
+    }
 }
