@@ -1,0 +1,22 @@
+version: 2
+
+updates:
+  # GitHub Actions(ワークフローの uses はコミット SHA で固定しているため、更新 PR で SHA とバージョンのコメントが更新される)
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Tokyo
+    open-pull-requests-limit: 5
+
+  # Maven(Spring Boot の親 POM と依存関係)
+  - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Tokyo
+    open-pull-requests-limit: 5
